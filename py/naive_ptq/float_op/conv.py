@@ -1,6 +1,8 @@
 import torch
 import numpy as np
+
 KERNEL_SIZE = 1
+
 
 def create_conv_1x1(weight, bias, in_c, out_c):
     assert weight.shape == (out_c, in_c, 1, 1)
@@ -9,6 +11,7 @@ def create_conv_1x1(weight, bias, in_c, out_c):
     torch_conv_float.weight.data = torch.from_numpy(weight)
     torch_conv_float.bias.data = torch.from_numpy(bias)
     return torch_conv_float
+
 
 def do_np_conv_1x1(weight, bias, input):
     """Do simplist 1x1 conv with out dilation and padding
@@ -29,4 +32,6 @@ def do_np_conv_1x1(weight, bias, input):
     assert in_c == input.shape[1]
     reshape_input = input.reshape((in_c, -1))
     multi_result = np.matmul(weight.reshape((out_c, in_c)), reshape_input)
-    return (multi_result + np.tile(bias.reshape(-1, 1), (1, input_h * input_w))).reshape((1, out_c, input_h, input_w))
+    return (
+        multi_result + np.tile(bias.reshape(-1, 1), (1, input_h * input_w))
+    ).reshape((1, out_c, input_h, input_w))
