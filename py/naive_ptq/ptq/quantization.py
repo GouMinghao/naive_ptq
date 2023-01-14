@@ -19,12 +19,12 @@ BIAS_MAP = {
 } # map from weight bit to bias bit
 
 class QuantizedArray:
-    def __init__(self, fp_arr, shiftbit, num_bit):
+    def __init__(self, arr, shiftbit, num_bit, do_quantize=True):
         """
         Quantized array inplementation
 
         Args:
-            fp_arr(np.array): the float point array to be quantized.
+            arr(np.array): the float point array to be quantized or int array.
             shiftbit(int): shift bits.
             num_bit(int): number of bits to quantize.
         """
@@ -32,8 +32,13 @@ class QuantizedArray:
         self.num_bit = num_bit
         self.shiftbit = shiftbit
         self.scale = 2 ** self.shiftbit
-        self.int_arr = np.round(fp_arr * self.scale).astype(BITS_MAP[self.num_bit]) # do scale and round
-        self.int_arr = np.clip(self.int_arr, - self.scale, self.scale - 1)
+        self.max_scale = 2 ** self.num_bit
+        if do_quantize:
+            self.int_arr = np.round(arr * self.scale).astype(BITS_MAP[self.num_bit]) # do scale and round
+            self.int_arr = np.clip(self.int_arr, - self.max_scale, self.max_scale - 1)
+        else:
+            assert arr.dtype in [np.int32, np.int64]
+            self.int_arr = arr
 
     @property
     def shape(self):
@@ -51,7 +56,7 @@ class QuantizedArray:
 
     def __mul__(self, other):
         """
-        Do fixed point multiplication.
+        Do fixed point matrix multiplication instead of elementsize.
 
         Args:
             other(QuantizedArray): the other operator.
@@ -60,7 +65,8 @@ class QuantizedArray:
         return QuantizedArray(
             np.matmul(self.int_arr, other.int_arr),
             self.shiftbit + other.shiftbit,
-            self.num_bit
+            self.num_bit,
+            do_quantize=False
         )
 
     def __add__(self, other):
@@ -74,7 +80,8 @@ class QuantizedArray:
         return QuantizedArray(
             self.int_arr + other.int_arr,
             self.shiftbit,
-            self.num_bit
+            self.num_bit,
+            do_quantize=False
         )
 
     def tile(self, shape):
@@ -97,7 +104,7 @@ class QuantizedConv:
         self.bias = bias
         self.input_shift_bit = input_shift_bit
         self.num_bit = num_bit
-    
+
     def __call__(self, input):
         """Do quantized conv
 
