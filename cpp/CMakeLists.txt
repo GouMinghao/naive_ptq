@@ -3,12 +3,15 @@ project(naive_ptq)
 
 # find package
 find_package(Eigen3)
-add_subdirectory(third_party/cJSON)
+
+# include directory
+include_directories(third_party)
 
 # add src directory
 aux_source_directory(src NAIVE_PTQ_SRC)
 
 # add library
+add_library(CJSON_LIB SHARED third_party/cJSON/cJSON.c)
 add_library(${PROJECT_NAME} SHARED ${NAIVE_PTQ_SRC})
 
 # add exec
@@ -20,5 +23,5 @@ target_include_directories(${PROJECT_NAME} PUBLIC include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${EIGEN3_INCLUDE_DIRS})
 
 # link
-target_link_libraries(${PROJECT_NAME} ${CJSON_LIB})
+target_link_libraries(${PROJECT_NAME} CJSON_LIB)
 target_link_libraries(naive_ptq_bin ${PROJECT_NAME})

@@ -114,12 +114,14 @@ class QuantizedConv:
             "weight": {
                 "num_bit": self.weight.num_bit,
                 "shift_bit": self.weight.shiftbit,
-                "arr": self.weight.int_arr.tolist(),
+                "shape": self.weight.shape,
+                "arr": self.weight.int_arr.flatten().tolist(),
             },
             "bias": {
                 "num_bit": self.bias.num_bit,
                 "shift_bit": self.bias.shiftbit,
-                "arr": self.bias.int_arr.tolist(),
+                "shape": self.bias.shape,
+                "arr": self.bias.int_arr.flatten().tolist(),
             },
             "input_shiftbit": self.input_shift_bit,
         }
@@ -132,10 +134,10 @@ class QuantizedConv:
         self.input_shift_bit = ckpt["input_shiftbit"]
         weight_num_bit = ckpt["weight"]["num_bit"]
         weight_shiftbit = ckpt["weight"]["shift_bit"]
-        weight_arr = np.array(ckpt["weight"]["arr"], dtype=BITS_MAP[weight_num_bit])
+        weight_arr = np.array(ckpt["weight"]["arr"], dtype=BITS_MAP[weight_num_bit]).reshape(ckpt["weight"]["shape"])
         bias_num_bit = ckpt["bias"]["num_bit"]
         bias_shiftbit = ckpt["bias"]["shift_bit"]
-        bias_arr = np.array(ckpt["bias"]["arr"], dtype=BITS_MAP[bias_num_bit])
+        bias_arr = np.array(ckpt["bias"]["arr"], dtype=BITS_MAP[bias_num_bit]).reshape(ckpt["bias"]["shape"])
         self.weight = QuantizedArray(
             weight_arr, weight_shiftbit, weight_num_bit, do_quantize=False
         )
