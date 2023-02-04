@@ -93,7 +93,6 @@ class QuantizedArray:
         self.int_arr = self.int_arr.reshape(shape)
         return self
 
-
 class QuantizedConv:
     def __init__(
         self,
@@ -171,16 +170,21 @@ class QuantizedConv:
             info_dict["input_shiftbit"] = quantized_input.shiftbit
             info_dict["input_shape"] = list(input.shape)
             info_dict["input_numbit"] = quantized_input.num_bit
+            input.astype(np.float64).tofile(os.path.join(self.save_dir, "input_fp64.bin"))
             quantized_input.int_arr.tofile(
                 os.path.join(
                     self.save_dir, "q_input_int{}.bin".format(quantized_input.num_bit)
                 )
             )
+            quantized_input.int_arr.astype(np.int32).tofile(
+                os.path.join(self.save_dir, "q_input_asint32.bin"))
         # do fixed point conv
         quantized_output = self.weight.reshape((out_c, in_c)) * quantized_input
+        print("mul result: {}".format(quantized_output.int_arr))
         tile_bias = self.bias.reshape((-1, 1)).tile((1, input_h * input_w))
         quantized_output += tile_bias
         quantized_output = quantized_output.reshape((1, out_c, input_h, input_w))
+        float_output = quantized_output.Dequantize()
         if self.save_dir is not None:
             info_dict["output_shiftbit"] = quantized_output.shiftbit
             info_dict["output_shape"] = list(quantized_output.int_arr.shape)
@@ -190,9 +194,13 @@ class QuantizedConv:
                     self.save_dir, "q_output_int{}.bin".format(quantized_output.num_bit)
                 )
             )
+            quantized_output.int_arr.astype(np.int32).tofile(
+                os.path.join(self.save_dir, "q_output_asint32.bin"))
             with open(
                 os.path.join(self.save_dir, "quant_conv_info.json"), "w"
             ) as json_f:
                 json.dump(info_dict, json_f)
+            float_output.astype(np.float64).tofile(os.path.join(self.save_dir, "output_fp64.bin"))
+
         # dequantize and output
-        return quantized_output.Dequantize()
+        return float_output

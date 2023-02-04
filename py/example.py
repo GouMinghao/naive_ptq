@@ -14,11 +14,11 @@ from naive_ptq.float_op.conv import KERNEL_SIZE, create_conv_1x1, do_np_conv_1x1
 
 SEED = 1233  # random seed to make result reproducable
 
-IN_C = 48
-OUT_C = 256
+IN_C = 4
+OUT_C = 8
 NUM_SAMPLES = 256  # ptq samples
-INPUT_H = 20
-INPUT_W = 20
+INPUT_H = 2
+INPUT_W = 2
 PTQ_BIT = 8
 DUMP_DIR = "dumps"
 os.makedirs(DUMP_DIR, exist_ok=True)
@@ -27,6 +27,12 @@ assert KERNEL_SIZE == 1, "only kernel == 1 implemented"
 torch.no_grad()
 random.seed(SEED)
 np.random.seed(SEED)
+
+def show_dump(dump_dir):
+    input_32 = np.fromfile(os.path.join(dump_dir, "q_input_asint32.bin"), dtype=np.int32)
+    output_32 = np.fromfile(os.path.join(dump_dir, "q_output_asint32.bin"), dtype=np.int32)
+    print("input 32: {}".format(input_32))
+    print("output_32: {}".format(output_32))
 
 if __name__ == "__main__":
     # create input and conv parameters
@@ -73,3 +79,4 @@ if __name__ == "__main__":
     diff = np.abs(torch_output_float.flatten() - ptq_output_float.flatten())
     print("diff:{}".format(diff))
     print("relative diff:{}".format(diff / np.abs(torch_output_float.flatten())))
+    show_dump(DUMP_DIR)

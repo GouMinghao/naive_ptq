@@ -39,7 +39,6 @@ Eigen::MatrixXi create_matrix(cJSON *shape, cJSON *arr)
     {
         uint32_t col = matrix_idx % shapes[1];
         uint32_t row = matrix_idx / shapes[1];
-        std::cout << "col:" << col << ", row:" << row << std::endl;
         matrix(row, col) = (arr_item -> valueint);
         matrix_idx ++;
     }
