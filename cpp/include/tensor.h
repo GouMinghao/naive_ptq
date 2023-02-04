@@ -8,9 +8,8 @@
 
 template<typename T>
 class Tensor {
- private:
-    Eigen::Matrix<T, -1, -1> _val;
  public:
+    Eigen::Matrix<T, -1, -1> _val;
     void show();
     uint32_t c;
     uint32_t h;
@@ -71,7 +70,36 @@ void Tensor<T>::show()
     std::cout << "c: " << this -> c;
     std::cout << ", h:" << this -> h;
     std::cout << ", w:" << this -> w;
-    std::cout << ", val: [" << this -> _val(0) << ", ... ,";
-    std::cout << this -> _val(this -> c * this -> h * this -> w - 1);
+    std::cout << ", val: [";
+    // std::cout << ", val: [" << this -> _val(0) << ", ... ,";
+    // std::cout << this -> _val(this -> c * this -> h * this -> w - 1);
+    Eigen::MatrixXi mat(this -> _val);
+    mat.resize(1, this -> c * this -> h * this -> w);
+    std::cout << mat;
     std::cout << "]" << std::endl;
+}
+
+template<typename T>
+bool Tensor<T>::operator==(Tensor<T> other)
+{
+    if (!(this -> c == other.c && this -> h == other.h && this -> w == other.w))
+    {
+        std::cout << "shape not equal" << std::endl;
+        std::cout << "this chw:" << this -> c << " " << this -> h;
+        std::cout << " " << this -> w << std::endl;
+        std::cout << "other chw:" << other.c << " " << other.h;
+        std::cout << " " << other.w << std::endl;
+        return false;
+    }
+    for (uint32_t i = 0; i < this -> c * this -> h * this -> w; i++)
+    {
+        if (this -> _val(i) != other._val(i))
+        {
+            std::cout << "val[" << i << "] not equal" << std::endl;
+            std::cout << "this: " << this -> _val(i);
+            std::cout << " other: " << other._val(i) << std::endl;
+            return false;
+        }
+    }
+    return true;
 }

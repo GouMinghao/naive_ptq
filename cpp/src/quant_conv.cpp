@@ -1,4 +1,4 @@
-#define QUANT_CONV_DEBUG
+// #define QUANT_CONV_DEBUG
 
 #include "quant_conv.h"
 #include "cJSON/cJSON.h"
@@ -56,5 +56,5 @@ Tensor<int32_t> QuantConv::call(Tensor<int32_t> input) {
         std::cout << "bias shape: " << this -> bias.rows() << std::endl;
 #endif
         mul_result.colwise() += this -> bias;
-        return Tensor<int32_t>(this -> output_c, input.h, input.w, mul_result);
+        return Tensor<int32_t>(this -> output_c, input.h, input.w, mul_result.transpose());
 }

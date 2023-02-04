@@ -43,10 +43,10 @@ python example.py
 python run_unit_tests.py
 ```
 
-2. Build C++ program.
-
-Comming soon.
-
-3. Run C++ inference and check consistency.
-
-Comming soon.
+2. Build C++ program and check consistency.
+```bash
+# install Eigen3 and cmake first
+# apt install libeigen3-dev cmake
+cd cpp
+bash run.sh
+```
